@@ -1,0 +1,130 @@
+-- ========================
+-- TABLA ZAPATOS
+-- ========================
+IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'Zapatos')
+BEGIN
+    CREATE TABLE Zapatos (
+        ID INT PRIMARY KEY IDENTITY(1,1),
+        Nombre VARCHAR(255) NOT NULL,
+        Marca VARCHAR(255),
+        Talla INT,
+        Precio DECIMAL(10,2),
+        Color VARCHAR(255)
+    );
+END;
+GO
+
+-- Eliminar registros y reiniciar IDENTITY
+DELETE FROM Zapatos;
+DBCC CHECKIDENT ('Zapatos', RESEED, 0);
+GO
+
+-- Insertar exactamente 100 registros en Zapatos
+INSERT INTO Zapatos (Nombre, Marca, Talla, Precio, Color)
+SELECT TOP 100 
+    'Modelo ' + CAST(ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) AS VARCHAR), 
+    'Marca ' + CAST(ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) AS VARCHAR),
+    38 + (ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) % 5),
+    50 + (ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) * 2),
+    'Color ' + CAST(ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) AS VARCHAR)
+FROM sys.all_objects;
+GO
+
+-- ========================
+-- TABLA CLIENTES
+-- ========================
+IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'Clientes')
+BEGIN
+    CREATE TABLE Clientes (
+        ID INT PRIMARY KEY IDENTITY(1,1),
+        Nombre VARCHAR(255) NOT NULL,
+        Direccion VARCHAR(255),
+        Telefono VARCHAR(20)
+    );
+END;
+GO
+
+-- Eliminar registros y reiniciar IDENTITY
+DELETE FROM Clientes;
+DBCC CHECKIDENT ('Clientes', RESEED, 0);
+GO
+
+-- Insertar exactamente 100 registros en Clientes
+INSERT INTO Clientes (Nombre, Direccion, Telefono)
+SELECT TOP 100 
+    'Cliente ' + CAST(ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) AS VARCHAR),
+    'Direccion ' + CAST(ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) AS VARCHAR),
+    '555-' + CAST(ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) AS VARCHAR)
+FROM sys.all_objects;
+GO
+
+-- ========================
+-- TABLA PEDIDOS
+-- ========================
+IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'Pedidos')
+BEGIN
+    CREATE TABLE Pedidos (
+        ID INT PRIMARY KEY IDENTITY(1,1),
+        ClienteID INT,
+        ZapatoID INT,
+        FechaPedido DATE,
+        FOREIGN KEY (ClienteID) REFERENCES Clientes(ID),
+        FOREIGN KEY (ZapatoID) REFERENCES Zapatos(ID)
+    );
+END;
+GO
+
+-- Eliminar registros y reiniciar IDENTITY
+DELETE FROM Pedidos;
+DBCC CHECKIDENT ('Pedidos', RESEED, 0);
+GO
+
+-- Insertar exactamente 100 registros en Pedidos con relaciones válidas
+INSERT INTO Pedidos (ClienteID, ZapatoID, FechaPedido)
+SELECT TOP 100 
+    (SELECT TOP 1 ID FROM Clientes ORDER BY NEWID()), 
+    (SELECT TOP 1 ID FROM Zapatos ORDER BY NEWID()),
+    DATEADD(DAY, (RAND(CHECKSUM(NEWID())) * 365) - 180, GETDATE()) -- Fechas aleatorias dentro de los últimos 180 días
+FROM sys.all_objects;
+GO
+
+-- ========================
+-- TABLA PROVEEDORES
+-- ========================
+IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'Proveedores')
+BEGIN
+    CREATE TABLE Proveedores (
+        ID INT PRIMARY KEY IDENTITY(1,1),
+        Nombre VARCHAR(255) NOT NULL,
+        Direccion VARCHAR(255),
+        Telefono VARCHAR(20)
+    );
+END;
+GO
+
+-- Eliminar registros y reiniciar IDENTITY
+DELETE FROM Proveedores;
+DBCC CHECKIDENT ('Proveedores', RESEED, 0);
+GO
+
+-- Insertar exactamente 100 registros en Proveedores
+INSERT INTO Proveedores (Nombre, Direccion, Telefono)
+SELECT TOP 100 
+    'Proveedor ' + CAST(ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) AS VARCHAR),
+    'Direccion ' + CAST(ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) AS VARCHAR),
+    '444-' + CAST(ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) AS VARCHAR)
+FROM sys.all_objects;
+GO
+
+-- ========================
+-- CONSULTA FINAL
+-- ========================
+SELECT 
+    Zapatos.Nombre AS ZapatoNombre,
+    Clientes.Nombre AS ClienteNombre,
+    Pedidos.FechaPedido
+FROM Pedidos
+JOIN Clientes ON Pedidos.ClienteID = Clientes.ID
+JOIN Zapatos ON Pedidos.ZapatoID = Zapatos.ID
+WHERE Pedidos.FechaPedido > '2025-01-01';
+GO
