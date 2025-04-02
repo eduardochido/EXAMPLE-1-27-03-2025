@@ -18,3 +18,12 @@ SELECT TOP 100
 FROM sys.all_objects;
 GO
 
+-- Insertar exactamente 100 registros en Clientes
+INSERT INTO Clientes (Nombre, Direccion, Telefono)
+SELECT TOP 100 
+    'Cliente ' + CAST(ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) AS VARCHAR),
+    'Direccion ' + CAST(ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) AS VARCHAR),
+    '555-' + CAST(ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) AS VARCHAR)
+FROM sys.all_objects;
+GO
+
