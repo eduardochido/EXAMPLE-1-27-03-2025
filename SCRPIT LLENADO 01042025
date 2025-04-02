@@ -36,3 +36,11 @@ SELECT TOP 100
 FROM sys.all_objects;
 GO
 
+-- Insertar exactamente 100 registros en Proveedores
+INSERT INTO Proveedores (Nombre, Direccion, Telefono)
+SELECT TOP 100 
+    'Proveedor ' + CAST(ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) AS VARCHAR),
+    'Direccion ' + CAST(ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) AS VARCHAR),
+    '444-' + CAST(ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) AS VARCHAR)
+FROM sys.all_objects;
+GO
