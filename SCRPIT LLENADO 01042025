@@ -27,3 +27,12 @@ SELECT TOP 100
 FROM sys.all_objects;
 GO
 
+-- Insertar exactamente 100 registros en Pedidos con relaciones válidas
+INSERT INTO Pedidos (ClienteID, ZapatoID, FechaPedido)
+SELECT TOP 100 
+    (SELECT TOP 1 ID FROM Clientes ORDER BY NEWID()), 
+    (SELECT TOP 1 ID FROM Zapatos ORDER BY NEWID()),
+    DATEADD(DAY, (RAND(CHECKSUM(NEWID())) * 365) - 180, GETDATE()) -- Fechas aleatorias dentro de los últimos 180 días
+FROM sys.all_objects;
+GO
+
