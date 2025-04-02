@@ -1,1 +1,11 @@
+-- Insertar exactamente 100 registros en Zapatos
+INSERT INTO Zapatos (Nombre, Marca, Talla, Precio, Color)
+SELECT TOP 100 
+    'Modelo ' + CAST(ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) AS VARCHAR), 
+    'Marca ' + CAST(ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) AS VARCHAR),
+    38 + (ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) % 5),
+    50 + (ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) * 2),
+    'Color ' + CAST(ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) AS VARCHAR)
+FROM sys.all_objects;
+GO
 
