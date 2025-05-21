@@ -1,0 +1,99 @@
+-- Eliminar las tablas si ya existen
+IF OBJECT_ID('ventas', 'U') IS NOT NULL
+    DROP TABLE ventas;
+
+IF OBJECT_ID('almacen', 'U') IS NOT NULL
+    DROP TABLE almacen;
+
+IF OBJECT_ID('estimado_ventas', 'U') IS NOT NULL
+    DROP TABLE estimado_ventas;
+
+IF OBJECT_ID('productos', 'U') IS NOT NULL
+    DROP TABLE productos;
+
+IF OBJECT_ID('usuarios', 'U') IS NOT NULL
+    DROP TABLE usuarios;
+
+-- Crear la tabla de usuarios
+CREATE TABLE usuarios (
+    id_usuario INT PRIMARY KEY IDENTITY(1,1),
+    nombre VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    contraseña VARCHAR(255) NOT NULL,
+    rol VARCHAR(50) NOT NULL
+);
+
+-- Crear la tabla de productos
+CREATE TABLE productos (
+    id_producto INT PRIMARY KEY IDENTITY(1,1),
+    nombre VARCHAR(255) NOT NULL,
+    descripcion TEXT,
+    precio DECIMAL(10, 2) NOT NULL,
+    stock INT NOT NULL,
+    categoria VARCHAR(100)
+);
+
+-- Crear la tabla de ventas
+CREATE TABLE ventas (
+    id_venta INT PRIMARY KEY IDENTITY(1,1),
+    fecha DATE NOT NULL,
+    hora TIME NOT NULL,
+    id_cliente INT,
+    id_producto INT,
+    cantidad INT NOT NULL,
+    precio DECIMAL(10, 2) NOT NULL,
+    iva DECIMAL(5, 2) NOT NULL,
+    FOREIGN KEY (id_cliente) REFERENCES usuarios(id_usuario),
+    FOREIGN KEY (id_producto) REFERENCES productos(id_producto)
+);
+
+-- Crear la tabla de almacen
+CREATE TABLE almacen (
+    id_almacen INT PRIMARY KEY IDENTITY(1,1),
+    id_producto INT,
+    cantidad INT NOT NULL,
+    ubicacion VARCHAR(255),
+    FOREIGN KEY (id_producto) REFERENCES productos(id_producto)
+);
+
+-- Crear la tabla de estimado_ventas
+CREATE TABLE estimado_ventas (
+    id_estimado INT PRIMARY KEY IDENTITY(1,1),
+    id_producto INT,
+    mes INT NOT NULL,
+    año INT NOT NULL,
+    cantidad_estimado INT NOT NULL,
+    FOREIGN KEY (id_producto) REFERENCES productos(id_producto)
+);
+
+-- Insertar datos de ejemplo en la tabla de usuarios
+INSERT INTO usuarios (nombre, email, contraseña, rol)
+VALUES ('Juan Pérez', 'juan@correo.com', 'password123', 'vendedor'),
+       ('Ana Gómez', 'ana@correo.com', 'password456', 'admin');
+
+-- Insertar datos de ejemplo en la tabla de productos
+INSERT INTO productos (nombre, descripcion, precio, stock, categoria)
+VALUES ('Laptop', 'Laptop de alta gama', 1500.00, 10, 'Tecnología'),
+       ('Mouse', 'Mouse inalámbrico', 25.99, 50, 'Accesorios');
+
+-- Insertar datos de ejemplo en la tabla de ventas
+INSERT INTO ventas (fecha, hora, id_cliente, id_producto, cantidad, precio, iva)
+VALUES ('2025-05-20', '10:30:00', 1, 1, 2, 1500.00, 21.00),
+       ('2025-05-20', '11:00:00', 2, 2, 1, 25.99, 21.00);
+
+-- Insertar datos de ejemplo en la tabla de almacen
+INSERT INTO almacen (id_producto, cantidad, ubicacion)
+VALUES (1, 10, 'A1'),
+       (2, 50, 'B2');
+
+-- Insertar datos de ejemplo en la tabla de estimado_ventas
+INSERT INTO estimado_ventas (id_producto, mes, año, cantidad_estimado)
+VALUES (1, 5, 2025, 20),
+       (2, 5, 2025, 100);
+
+-- Ver los datos de cada tabla
+SELECT * FROM usuarios;
+SELECT * FROM productos;
+SELECT * FROM ventas;
+SELECT * FROM almacen;
+SELECT * FROM estimado_ventas;
